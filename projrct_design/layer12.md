@@ -1,6 +1,120 @@
 # 大整数群(BigInt)
 BigInt大整数是密码学运算中的计算单位基础，同样也是我们构建的密码库的第一层，基于C++的函数重载等特性，可以为单个运算符定义多种传参方式。这里我们将整个大整数群逻辑上分成两部分，BigInt(大整数)和NumThrory(数论)。
-## BigInt
+## BigInt 依赖关系
+依赖关系主要描述的是cpp文件包含.h文件的详细信息，以及对应.h头文件的具体内容。   
+**.h头文件内容**  
+**bigint.h**
+```c++
+#include "bigint.h"
+/**
+1. 定义了大整数的基本特性，如符号(positive, negative)和进制除零处理等。
+2. 定义创建大整数的方法，创建一个随机大整数、创建一个空(empty)大整数、通过字符串创建一个大整数(通过输入的参数的前缀进行解析，如0x解析为16进制)、通过数组arrary创建大整数(利用C++函数重载特性，设计不同函数对应不同的传参)。
+3. 定义大整数的运算符(+，-，*，/，+=，-=，++，--等)对应的操作。
+4. 定义大整数bit移位操作(<<=，>>=)。
+5. 定义大整数布尔运算。
+6. 定义大整数模运算(模加，模减，模除，乘法逆元，开平方等)。
+7. 定义大整数的进制转换，符号变换，比特指定位置操作等。
+8. 定义大整数的长度等操作。
+*/
+    -> #include "types.h"
+    -> #include "secmem.h"
+    -> #include "exceptn.h"
+/// end of bigint.h
+```
+**一级调用**
+```c++
+#include "types.h"
+    | bigint.h -> types.h
+    --> #include "build.h" //二级调用
+    --> #include "assert.h" //二级调用
+//define types
+
+//////////////////////////////////////////////
+    using byte   = std::uint8_t;
+    using u16bit = std::uint16_t;
+    using u32bit = std::uint32_t;
+    using u64bit = std::uint64_t;
+    using s32bit = std::int32_t;
+//////////////////////////////////////////////
+
+/*
+* These typedefs are no longer used within the library headers
+* or code. They are kept only for compatability with software
+* written against older versions.
+*/
+
+/// end of types.h
+```
+```c++
+#include "secmem.h"
+    from | bigint.h -> secmem.h
+    -> #include "types.h" //一级调用
+    --> #include "mem_ops.h" //二级调用
+// code
+class secure_allocator{
+      /*
+      * Assert exists to prevent someone from doing something that will
+      * probably crash anyway (like secure_vector<non_POD_t> where ~non_POD_t
+      * deletes a member pointer which was zeroed before it ran).
+      * MSVC in debug mode uses non-integral proxy types in container types
+      * like std::vector, thus we disable the check there.
+      */
+}
+
+/// end of secmem.h
+```
+
+```c++
+#include "exceptn.h"
+    from | bigint.h -> exceptn.h
+    -> #include "types.h" //一级调用
+主要是异常处理的相对应的动作，通过枚举的方式进行映射。
+/**
+* Different types of errors that might occur
+*/
+enum class ErrorType {......}
+
+class BOTAN_PUBLIC_API(2,0) ...... : ......
+
+/// end of exceptn.h
+```
+**二级调用**
+```c++
+#include "build.h"
+    from | bigint.h -> types.h -> build.h
+// 通过 #define 进行宏定义
+// 主要是configure配置作用
+```
+```c++
+#include "assert.h"
+    from | bigint.h -> types.h -> assert.h
+    --> #include "build.h" //二级调用
+    ---> #inlcude "compile.h" //三级调用
+// make assertion and will be called at some special conditions
+/// end of assert.h
+```
+```c++
+#include "mem_ops.h"
+    from | bigint.h -> secmem.h -> memops.h
+
+// 主要为大整数的运算设计相应的虚拟内存空间，便于相应的数学计算等操作。
+// 这个头文件中定义为大整数所设计的数据结构的相应运算操作。
+template<typename T> inline void copy_mem(T* out, const T* in, size_t n) {}
+template<typename T> inline void clear_mem(T* ptr, size_t n) {}
+......
+/// end of mem_ops.h
+```
+**三级调用**
+```c++
+#include "compile.h"
+    from | bigint.h -> types.h -> assert.h -> compile.h
+// 主要是编译相关的配置定义等。
+// 考虑到ckb的特性，并且我们采用RISC-V的gcc工具链编译C和C++文件，这里我们对其不做考虑。
+//// end of compile.h
+```
+
+
+## BigInt 具体实现
 我们将与大整数构建、简单运算和其数据结构的方法封装到同一个类(class)中。
 ### class BigInt
 #### BigInt()
