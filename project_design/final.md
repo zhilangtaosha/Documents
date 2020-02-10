@@ -7,7 +7,7 @@
 设计整合实现一个密码学库。密码学库包含大整数层、有限群层、密码学原语，并通过密码学原语实现若干密码学方案与密码学协议
 
 # 前提假设
-ckb工具链支持c、c++11、go、rust.   
+RISC-V工具链支持c、c++11、go、rust.   
 工程实现中底层实现选择成熟密码库以防止安全漏洞
 
 # 解决思路
@@ -158,7 +158,6 @@ template<typename T> inline void clear_mem(T* ptr, size_t n) {}
 #include "compile.h"
     from | bigint.h -> types.h -> assert.h -> compile.h
 // 主要是编译相关的配置定义等。
-// 考虑到ckb的特性，并且我们采用RISC-V的gcc工具链编译C和C++文件，这里我们对其不做考虑。
 //// end of compile.h
 ```
 
@@ -442,35 +441,35 @@ class BOTAN_PUBLIC_API(2,0) Buffered_Computation {...}
 每一个运算符都会封装一个对应的运算函数，在函数体内完成大整数的对应运算，函数的返回类型都为BigInt。
 
 #### 判断类型的函数(bool)
-##### is_even(): Rerurn true if *this is even.  
-##### is_odd(): Return true if *this is odd.  
-##### is_nonzero(): Return true if *this is not zero.  
-##### is_zero(): Return true if *this is zero.  
-##### is_negative(): Return true if *this is is negative.  
-##### is_positive(): Return true if *this is positive.  
-##### abs(): Return absolute value of *this.  
+- is_even(): Rerurn true if *this is even.  
+- is_odd(): Return true if *this is odd.  
+- is_nonzero(): Return true if *this is not zero.  
+- is_zero(): Return true if *this is zero.  
+- is_negative(): Return true if *this is is negative.  
+- is_positive(): Return true if *this is positive.  
+- abs(): Return absolute value of *this.  
 上述函数都封装在BigInt类中，通过实例化的对象调用，返回的结果对应该对象的某一特征。
 
 #### bit操作类型的函数
 同样对于bit运算来说，对应的函数也封装在BigInt类中，通过调用函数，对实例化的对象进行相应的bit操作。
-##### set_bit(): Set bit n of *this.
-##### clear_bit(): Clear bit n of *this.
-##### get_bit(): Get bit n of *this.
+- set_bit(): Set bit n of *this.
+- clear_bit(): Clear bit n of *this.
+- get_bit(): Get bit n of *this.
 
 #### 编码解码，进制转换
-##### binary_encode(uint8_t buf[]): Encode this BigInt as a big-endian integer.
-##### binary_decode(uint8_t buf[]): Decode this BigInt as a big-endian integer. 
-##### to_dec_string(uint8_t buf[]): Encode the integer as a decimal string.
-##### to_hex_string(uint8_t buf[]): Encode the integet as a hexadecimal string.
+- binary_encode(uint8_t buf[]): Encode this BigInt as a big-endian integer.
+- binary_decode(uint8_t buf[]): Decode this BigInt as a big-endian integer. 
+- to_dec_string(uint8_t buf[]): Encode the integer as a decimal string.
+- to_hex_string(uint8_t buf[]): Encode the integet as a hexadecimal string.
 
 ## 数论(Number Theory)
-在大整数群层面，通过封装好大整数的基本类BigInt，我们还需对其进行数论领域的基本运算，数论相关的函数和class BigInt在整个系统架构层面可以看作同一级，且都在同一个命名域(namespace)空间下。
-### BigInt gcd(x, y): 计算大整数x和y的最大公约数
-### BigInt lcm(x, y): 计算大整数x和y的最小公倍数(z%x==0||z%y==0)
-### BigInt jacobi(a, n): 计算Jacobi符号(a|n)
-### BigInt inverse_mod(x, m): 计算乘法逆元，返回y(x*y)%m==1
-### BigInt power_mod(b, x, m): 指数模运算，x为底，b为指数，m是模
-### BigInt ressol(x, p): 计算平方根，返回y(y*y)%p == x，当结果不存在时返回-1
+在大整数群层面，通过封装好大整数的基本类BigInt，我们还需对其进行数论领域的基本运算，数论相关的函数和class BigInt在整个系统架构层面可以看作同一级，且都在同一个命名域(namespace)空间下。具体如最大公约数，Jacobi符号，数模运算等。  
+- BigInt gcd(x, y): 计算大整数x和y的最大公约数
+- BigInt lcm(x, y): 计算大整数x和y的最小公倍数(z%x==0||z%y==0)
+- BigInt jacobi(a, n): 计算Jacobi符号(a|n)
+- BigInt inverse_mod(x, m): 计算乘法逆元，返回y(x*y)%m==1
+- BigInt power_mod(b, x, m): 指数模运算，x为底，b为指数，m是模
+- BigInt ressol(x, p): 计算平方根，返回y(y*y)%p == x，当结果不存在时返回-1
 
 
 ## 第二层 有限群层(密码学算法的数学基础--Group)
