@@ -45,7 +45,7 @@ tx = tx.sign(wallet.key)
 
 ############################################
 # 发送交易  如果内有debug函数 ckb节点能看到
-api.send_transaction(tx)
+api.send_transaction(tx,"passthrough")
 
 
 ```
