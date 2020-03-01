@@ -18,8 +18,9 @@ ckb-ruby-sdk    版本 0.28.0
 ***与参考网址不同的话以此处为主***
 
 ```ruby
-wallet = CKB::Wallet.from_hex("0x92...31")  # 从私钥生成钱包
 api = CKB::API.new(host:"http://127.0.0.1:8114")  # 连接CKB节点 换成自己节点端口 默认8114
+wallet = CKB::Wallet.from_hex(api,"0x92...31")  # 从私钥生成钱包
+
 ############################################
 # 程序上链
 
